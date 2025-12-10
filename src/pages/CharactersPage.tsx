@@ -1,87 +1,76 @@
-import { JSX, useMemo } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { characters } from "../data";
+import { JSX, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useInfiniteCharacters } from "../hooks/useInfiniteCharacters";
 import type { Character } from "../types";
 
-type SortOrder = "asc" | "desc";
-
 function CharactersPage(): JSX.Element {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { characters, loading, error, hasMore, loadMore } =
+    useInfiniteCharacters();
 
-  const sortParam: string | null = searchParams.get("sort");
-  const sortOrder: SortOrder = sortParam === "desc" ? "desc" : "asc";
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const lastElementRef = useRef<HTMLLIElement | null>(null);
 
-  const sortedCharacters: Character[] = useMemo(() => {
-    const copiedCharacters: Character[] = [...characters];
+  useEffect(() => {
+    if (loading) return;
 
-    copiedCharacters.sort((a, b) => {
-      const dateA: number = new Date(a.created).getTime();
-      const dateB: number = new Date(b.created).getTime();
+    if (observerRef.current) observerRef.current.disconnect();
 
-      if (sortOrder === "asc") {
-        return dateA - dateB;
+    observerRef.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore) {
+        loadMore();
       }
-
-      return dateB - dateA;
     });
 
-    return copiedCharacters;
-  }, [sortOrder]);
-
-  function handleSortChange(event: React.ChangeEvent<HTMLSelectElement>): void {
-    const value: string = event.target.value;
-    const nextSortOrder: SortOrder = value === "desc" ? "desc" : "asc";
-
-    setSearchParams({ sort: nextSortOrder });
-  }
+    if (lastElementRef.current) {
+      observerRef.current.observe(lastElementRef.current);
+    }
+  }, [loading, hasMore, loadMore]);
 
   return (
     <section>
       <h2>Персонажи</h2>
 
-      <div style={{ marginBottom: "12px" }}>
-        <label>
-          Сортировать по дате создания:{" "}
-          <select value={sortOrder} onChange={handleSortChange}>
-            <option value="asc">По возрастанию (старые → новые)</option>
-            <option value="desc">По убыванию (новые → старые)</option>
-          </select>
-        </label>
-      </div>
-
       <ul
         style={{ display: "grid", gap: "12px", listStyle: "none", padding: 0 }}
       >
-        {sortedCharacters.map((character: Character) => (
-          <li
-            key={character.id}
-            style={{
-              border: "1px solid #ddd",
-              borderRadius: "8px",
-              padding: "8px",
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-            }}
-          >
-            <img
-              src={character.image}
-              alt={character.name}
-              width={80}
-              height={80}
-              style={{ borderRadius: "8px", objectFit: "cover" }}
-            />
-            <div>
-              <Link to={`/characters/${character.id}`}>
-                <strong>{character.name}</strong>
-              </Link>
+        {characters.map((character: Character, index: number) => {
+          const isLast = index === characters.length - 1;
+          return (
+            <li
+              key={character.id}
+              ref={isLast ? lastElementRef : null}
+              style={{
+                border: "1px solid #ddd",
+                borderRadius: "8px",
+                padding: "8px",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+              }}
+            >
+              <img
+                src={character.image}
+                alt={character.name}
+                width={80}
+                height={80}
+                style={{ borderRadius: "8px", objectFit: "cover" }}
+              />
               <div>
-                {character.status} • {character.species}
+                <Link to={`/characters/${character.id}`}>
+                  <strong>{character.name}</strong>
+                </Link>
+                <div>
+                  {character.status} • {character.species}
+                </div>
               </div>
-            </div>
-          </li>
-        ))}
+            </li>
+          );
+        })}
       </ul>
+
+      {loading && <p>Загрузка...</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      {!hasMore && <p>Больше персонажей нет</p>}
     </section>
   );
 }
