@@ -1,18 +1,20 @@
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { lazy, Suspense } from "react";
 import "./index.css";
 import MainLayout from "./layouts/MainLayout";
-import HomePage from "./pages/HomePage";
-import CharactersPage from "./pages/CharactersPage";
-import CharacterDetailsPage from "./pages/CharacterDetailsPage";
-import LocationsPage from "./pages/LocationsPage";
-import LocationDetailsPage from "./pages/LocationDetailsPage";
-import EpisodesPage from "./pages/EpisodesPage";
-import EpisodeDetailsPage from "./pages/EpisodeDetailsPage";
-import NotFoundPage from "./pages/NotFoundPage";
-import LoginPage from "./pages/LoginPage";
-import { AuthProvider } from "./hoc/AuthProvider";
 import PrivateRoute from "./components/PrivateRoute";
+import { AuthProvider } from "./hoc/AuthProvider";
+
+const HomePage = lazy(() => import("./pages/HomePage"));
+const CharactersPage = lazy(() => import("./pages/CharactersPage"));
+const CharacterDetailsPage = lazy(() => import("./pages/CharacterDetailsPage"));
+const LocationsPage = lazy(() => import("./pages/LocationsPage"));
+const LocationDetailsPage = lazy(() => import("./pages/LocationDetailsPage"));
+const EpisodesPage = lazy(() => import("./pages/EpisodesPage"));
+const EpisodeDetailsPage = lazy(() => import("./pages/EpisodeDetailsPage"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
 const rootElement = document.getElementById("root");
 
@@ -22,65 +24,67 @@ if (rootElement !== null) {
   root.render(
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={<MainLayout />}>
-            <Route index element={<HomePage />} />
+        <Suspense fallback={<div>Загрузка...</div>}>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/" element={<MainLayout />}>
+              <Route index element={<HomePage />} />
 
-            <Route
-              path="characters"
-              element={
-                <PrivateRoute>
-                  <CharactersPage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="characters/:id"
-              element={
-                <PrivateRoute>
-                  <CharacterDetailsPage />
-                </PrivateRoute>
-              }
-            />
+              <Route
+                path="characters"
+                element={
+                  <PrivateRoute>
+                    <CharactersPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="characters/:id"
+                element={
+                  <PrivateRoute>
+                    <CharacterDetailsPage />
+                  </PrivateRoute>
+                }
+              />
 
-            <Route
-              path="locations"
-              element={
-                <PrivateRoute>
-                  <LocationsPage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="locations/:id"
-              element={
-                <PrivateRoute>
-                  <LocationDetailsPage />
-                </PrivateRoute>
-              }
-            />
+              <Route
+                path="locations"
+                element={
+                  <PrivateRoute>
+                    <LocationsPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="locations/:id"
+                element={
+                  <PrivateRoute>
+                    <LocationDetailsPage />
+                  </PrivateRoute>
+                }
+              />
 
-            <Route
-              path="episodes"
-              element={
-                <PrivateRoute>
-                  <EpisodesPage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="episodes/:id"
-              element={
-                <PrivateRoute>
-                  <EpisodeDetailsPage />
-                </PrivateRoute>
-              }
-            />
+              <Route
+                path="episodes"
+                element={
+                  <PrivateRoute>
+                    <EpisodesPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="episodes/:id"
+                element={
+                  <PrivateRoute>
+                    <EpisodeDetailsPage />
+                  </PrivateRoute>
+                }
+              />
 
-            <Route path="*" element={<NotFoundPage />} />
-          </Route>
-        </Routes>
+              <Route path="*" element={<NotFoundPage />} />
+            </Route>
+          </Routes>
+        </Suspense>
       </AuthProvider>
     </BrowserRouter>
   );
