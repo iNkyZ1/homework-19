@@ -1,20 +1,40 @@
-import { JSX } from "react";
+import { JSX, useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { characters } from "../data";
 import type { Character } from "../types";
 
 function CharacterDetailsPage(): JSX.Element {
-  const params = useParams();
-  const idParam: string | undefined = params.id;
+  const { id } = useParams();
+  const [character, setCharacter] = useState<Character | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const id: number | null = idParam !== undefined ? Number(idParam) : null;
+  useEffect(() => {
+    async function fetchCharacter() {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `https://rickandmortyapi.com/api/character/${id}`
+        );
+        if (!response.ok) {
+          throw new Error("Персонаж не найден");
+        }
+        const data: Character = await response.json();
+        setCharacter(data);
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  const character: Character | undefined =
-    id !== null
-      ? characters.find((item: Character) => item.id === id)
-      : undefined;
+    if (id) fetchCharacter();
+  }, [id]);
 
-  if (character === undefined) {
+  if (loading) {
+    return <p>Загрузка...</p>;
+  }
+
+  if (error || !character) {
     return (
       <section>
         <h2>Персонаж не найден</h2>
