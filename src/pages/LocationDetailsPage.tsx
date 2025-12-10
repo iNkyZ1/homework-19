@@ -1,19 +1,37 @@
-import { JSX } from "react";
+import { JSX, useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { locations } from "../data";
 import type { Location } from "../types";
 
 function LocationDetailsPage(): JSX.Element {
-  const params = useParams();
-  const idParam: string | undefined = params.id;
-  const id: number | null = idParam !== undefined ? Number(idParam) : null;
+  const { id } = useParams();
+  const [location, setLocation] = useState<Location | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const location: Location | undefined =
-    id !== null
-      ? locations.find((item: Location) => item.id === id)
-      : undefined;
+  useEffect(() => {
+    async function fetchLocation() {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `https://rickandmortyapi.com/api/location/${id}`
+        );
+        if (!response.ok) throw new Error("Локация не найдена");
 
-  if (location === undefined) {
+        const data: Location = await response.json();
+        setLocation(data);
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (id) fetchLocation();
+  }, [id]);
+
+  if (loading) return <p>Загрузка...</p>;
+
+  if (error || !location) {
     return (
       <section>
         <h2>Локация не найдена</h2>
