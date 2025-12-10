@@ -1,6 +1,7 @@
 import { JSX } from "react";
 import { Link, Outlet } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 function MainLayout(): JSX.Element {
   const { isAuthenticated, logout } = useAuth();
@@ -32,7 +33,9 @@ function MainLayout(): JSX.Element {
       </header>
 
       <main style={{ padding: "16px" }}>
-        <Outlet />
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </main>
     </div>
   );
