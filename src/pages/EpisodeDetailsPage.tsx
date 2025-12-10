@@ -1,17 +1,37 @@
-import { JSX } from "react";
+import { JSX, useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { episodes } from "../data";
 import type { Episode } from "../types";
 
 function EpisodeDetailsPage(): JSX.Element {
-  const params = useParams();
-  const idParam: string | undefined = params.id;
-  const id: number | null = idParam !== undefined ? Number(idParam) : null;
+  const { id } = useParams();
+  const [episode, setEpisode] = useState<Episode | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const episode: Episode | undefined =
-    id !== null ? episodes.find((item: Episode) => item.id === id) : undefined;
+  useEffect(() => {
+    async function fetchEpisode() {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `https://rickandmortyapi.com/api/episode/${id}`
+        );
+        if (!response.ok) throw new Error("Эпизод не найден");
 
-  if (episode === undefined) {
+        const data: Episode = await response.json();
+        setEpisode(data);
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (id) fetchEpisode();
+  }, [id]);
+
+  if (loading) return <p>Загрузка...</p>;
+
+  if (error || !episode) {
     return (
       <section>
         <h2>Эпизод не найден</h2>
