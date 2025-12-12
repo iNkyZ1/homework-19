@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 
-import MainLayout from "@/layouts/MainLayout";
+import { AppLayout } from "@/widgets/layout/AppLayout";
 import PrivateRoute from "@/features/auth/ui/PrivateRoute";
 import { AppProviders, AppLoader } from "./providers";
 
@@ -24,7 +24,7 @@ export default function App() {
         <Suspense fallback={<AppLoader />}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/" element={<MainLayout />}>
+            <Route path="/" element={<AppLayout />}>
               <Route index element={<HomePage />} />
 
               <Route
