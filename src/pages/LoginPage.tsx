@@ -1,44 +1,47 @@
 import { useState } from "react";
-import { useAuth } from "../features/auth/model/useAuth";
+import { TextInput, Button, Paper, Title, Stack, Center } from "@mantine/core";
+import { useAuth } from "@/features/auth/model/useAuth";
 
-const LoginPage = () => {
+function LoginPage() {
   const { login } = useAuth();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (username && password) {
+    setLoading(true);
+
+    setTimeout(() => {
       login();
-    } else {
-      alert("Введите логин и пароль");
-    }
+      setLoading(false);
+    }, 300);
   };
 
   return (
-    <div style={{ padding: "1rem" }}>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Логин:</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Пароль:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <button type="submit">Войти</button>
-      </form>
-    </div>
+    <Center h="100vh">
+      <Paper withBorder radius="md" p="lg" w={320}>
+        <form onSubmit={handleSubmit}>
+          <Stack>
+            <Title order={3} ta="center">
+              Вход
+            </Title>
+
+            <TextInput label="Логин" placeholder="Введите логин" required />
+
+            <TextInput
+              label="Пароль"
+              type="password"
+              placeholder="Введите пароль"
+              required
+            />
+
+            <Button type="submit" loading={loading} fullWidth>
+              Войти
+            </Button>
+          </Stack>
+        </form>
+      </Paper>
+    </Center>
   );
-};
+}
 
 export default LoginPage;
