@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { fetchCharacters } from "../utils/api";
-import type { Character } from "../types";
+import { fetchCharacters } from "@/entities/character/api/characterApi";
+import type { Character } from "@/entities/character/model/types";
 
 export function useInfiniteCharacters() {
   const [characters, setCharacters] = useState<Character[]>([]);
@@ -12,14 +12,18 @@ export function useInfiniteCharacters() {
   useEffect(() => {
     const loadCharacters = async () => {
       if (!hasMore || loading) return;
+
       try {
         setLoading(true);
-        const { results, hasMore: more } = await fetchCharacters(page);
-        setCharacters((prev) => [...prev, ...results]);
-        setHasMore(more);
-        setLoading(false);
+
+        const data = await fetchCharacters(page);
+
+        setCharacters((prev) => [...prev, ...data.results]);
+        setHasMore(Boolean(data.info.next));
+        setError(null);
       } catch (err) {
         setError((err as Error).message);
+      } finally {
         setLoading(false);
       }
     };

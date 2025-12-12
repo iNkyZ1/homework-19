@@ -1,7 +1,7 @@
 import { JSX, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useInfiniteCharacters } from "../hooks/useInfiniteCharacters";
-import type { Character } from "../types";
+import { useInfiniteCharacters } from "@/entities/character/model/useInfiniteCharacters";
+import type { Character } from "@/entities/character/model/types";
 
 function CharactersPage(): JSX.Element {
   const { characters, loading, error, hasMore, loadMore } =
