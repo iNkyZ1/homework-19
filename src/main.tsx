@@ -6,6 +6,9 @@ import MainLayout from "./layouts/MainLayout";
 import PrivateRoute from "./components/PrivateRoute";
 import { AuthProvider } from "./hoc/AuthProvider";
 
+import { MantineProvider, Center, Loader } from "@mantine/core";
+import { MantineEmotionProvider } from "@mantine/emotion";
+
 const HomePage = lazy(() => import("./pages/HomePage"));
 const CharactersPage = lazy(() => import("./pages/CharactersPage"));
 const CharacterDetailsPage = lazy(() => import("./pages/CharacterDetailsPage"));
@@ -23,69 +26,87 @@ if (rootElement !== null) {
 
   root.render(
     <BrowserRouter>
-      <AuthProvider>
-        <Suspense fallback={<div>Загрузка...</div>}>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/" element={<MainLayout />}>
-              <Route index element={<HomePage />} />
+      <MantineEmotionProvider>
+        <MantineProvider
+          defaultColorScheme="light"
+          theme={{
+            primaryColor: "blue",
+            defaultRadius: "md",
+            fontFamily:
+              "system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif",
+          }}
+        >
+          <AuthProvider>
+            <Suspense
+              fallback={
+                <Center h="100vh">
+                  <Loader />
+                </Center>
+              }
+            >
+              <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/" element={<MainLayout />}>
+                  <Route index element={<HomePage />} />
 
-              <Route
-                path="characters"
-                element={
-                  <PrivateRoute>
-                    <CharactersPage />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="characters/:id"
-                element={
-                  <PrivateRoute>
-                    <CharacterDetailsPage />
-                  </PrivateRoute>
-                }
-              />
+                  <Route
+                    path="characters"
+                    element={
+                      <PrivateRoute>
+                        <CharactersPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="characters/:id"
+                    element={
+                      <PrivateRoute>
+                        <CharacterDetailsPage />
+                      </PrivateRoute>
+                    }
+                  />
 
-              <Route
-                path="locations"
-                element={
-                  <PrivateRoute>
-                    <LocationsPage />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="locations/:id"
-                element={
-                  <PrivateRoute>
-                    <LocationDetailsPage />
-                  </PrivateRoute>
-                }
-              />
+                  <Route
+                    path="locations"
+                    element={
+                      <PrivateRoute>
+                        <LocationsPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="locations/:id"
+                    element={
+                      <PrivateRoute>
+                        <LocationDetailsPage />
+                      </PrivateRoute>
+                    }
+                  />
 
-              <Route
-                path="episodes"
-                element={
-                  <PrivateRoute>
-                    <EpisodesPage />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="episodes/:id"
-                element={
-                  <PrivateRoute>
-                    <EpisodeDetailsPage />
-                  </PrivateRoute>
-                }
-              />
+                  <Route
+                    path="episodes"
+                    element={
+                      <PrivateRoute>
+                        <EpisodesPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="episodes/:id"
+                    element={
+                      <PrivateRoute>
+                        <EpisodeDetailsPage />
+                      </PrivateRoute>
+                    }
+                  />
 
-              <Route path="*" element={<NotFoundPage />} />
-            </Route>
-          </Routes>
-        </Suspense>
-      </AuthProvider>
+                  <Route path="*" element={<NotFoundPage />} />
+                </Route>
+              </Routes>
+            </Suspense>
+          </AuthProvider>
+        </MantineProvider>
+      </MantineEmotionProvider>
     </BrowserRouter>
   );
 }
