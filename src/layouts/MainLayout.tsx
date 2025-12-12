@@ -1,6 +1,6 @@
 import { JSX } from "react";
 import { Link, Outlet } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../features/auth/model/useAuth";
 import ErrorBoundary from "../components/ErrorBoundary";
 
 function MainLayout(): JSX.Element {
