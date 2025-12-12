@@ -1,11 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 
-import MainLayout from "../layouts/MainLayout";
-import PrivateRoute from "../features/auth/ui/PrivateRoute";
+import MainLayout from "@/layouts/MainLayout";
+import PrivateRoute from "@/features/auth/ui/PrivateRoute";
 import { AppProviders, AppLoader } from "./providers";
 
-const HomePage = lazy(() => import("../pages/HomePage"));
+const HomePage = lazy(() => import("@/pages/HomePage"));
 const CharactersPage = lazy(() => import("../pages/CharactersPage"));
 const CharacterDetailsPage = lazy(
   () => import("../pages/CharacterDetailsPage")

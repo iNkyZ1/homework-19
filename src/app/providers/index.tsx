@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { MantineProvider, Center, Loader } from "@mantine/core";
 import { MantineEmotionProvider } from "@mantine/emotion";
-import { AuthProvider } from "../../features/auth/model/AuthProvider";
+import { AuthProvider } from "@/features/auth/model/AuthProvider";
 
 type Props = {
   children: ReactNode;
