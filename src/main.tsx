@@ -1,5 +1,5 @@
 import ReactDOM from "react-dom/client";
-import "./index.css";
+import "@mantine/core/styles.css";
 import App from "@/app/App";
 
 const rootElement = document.getElementById("root");

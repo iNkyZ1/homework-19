@@ -1,4 +1,4 @@
-import { AppShell, NavLink, Stack, Button } from "@mantine/core";
+import { AppShell, NavLink, Stack, Button, Container } from "@mantine/core";
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/features/auth/model/useAuth";
 
@@ -48,7 +48,9 @@ export function AppLayout() {
       </AppShell.Navbar>
 
       <AppShell.Main>
-        <Outlet />
+        <Container size="lg" py="md">
+          <Outlet />
+        </Container>
       </AppShell.Main>
     </AppShell>
   );
