@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import type { Location } from "../types";
-
-const API_URL = "https://rickandmortyapi.com/api/location";
+import { fetchLocations } from "@/entities/location/api/locationApi";
+import type { Location } from "@/entities/location/model/types";
 
 export function useInfiniteLocations() {
   const [locations, setLocations] = useState<Location[]>([]);
@@ -11,17 +10,16 @@ export function useInfiniteLocations() {
   const [error, setError] = useState<null | string>(null);
 
   useEffect(() => {
-    const fetchLocations = async () => {
+    const loadLocations = async () => {
       if (!hasMore || loading) return;
 
       try {
         setLoading(true);
-        const response = await fetch(`${API_URL}?page=${page}`);
-        if (!response.ok) throw new Error("Ошибка при загрузке локаций");
+        const data = await fetchLocations(page);
 
-        const data = await response.json();
         setLocations((prev) => [...prev, ...data.results]);
-        setHasMore(data.info.next !== null);
+        setHasMore(Boolean(data.info.next));
+        setError(null);
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -29,7 +27,7 @@ export function useInfiniteLocations() {
       }
     };
 
-    fetchLocations();
+    loadLocations();
   }, [hasMore, loading, page]);
 
   return {
