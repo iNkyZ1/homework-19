@@ -1,65 +1,42 @@
-import { JSX, useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import type { Episode } from "../types";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { Center, Loader, Text } from "@mantine/core";
+import { fetchEpisodeById } from "@/entities/episode/api/episodeApi";
+import { EpisodeDetailsCard } from "@/entities/episode/ui/EpisodeDetailsCard";
+import type { Episode } from "@/entities/episode/model/types";
 
-function EpisodeDetailsPage(): JSX.Element {
-  const { id } = useParams();
+function EpisodeDetailsPage() {
+  const { id } = useParams<{ id: string }>();
   const [episode, setEpisode] = useState<Episode | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchEpisode() {
-      try {
-        setLoading(true);
-        const response = await fetch(
-          `https://rickandmortyapi.com/api/episode/${id}`
-        );
-        if (!response.ok) throw new Error("Эпизод не найден");
+    if (!id) return;
 
-        const data: Episode = await response.json();
-        setEpisode(data);
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    if (id) fetchEpisode();
+    fetchEpisodeById(id)
+      .then(setEpisode)
+      .catch((err) => setError((err as Error).message))
+      .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <p>Загрузка...</p>;
-
-  if (error || !episode) {
+  if (loading) {
     return (
-      <section>
-        <h2>Эпизод не найден</h2>
-        <Link to="/episodes">Вернуться к списку эпизодов</Link>
-      </section>
+      <Center>
+        <Loader />
+      </Center>
     );
   }
 
-  return (
-    <section>
-      <h2>{episode.name}</h2>
-      <ul>
-        <li>
-          <strong>Episode:</strong> {episode.episode}
-        </li>
-        <li>
-          <strong>Air date:</strong> {episode.air_date}
-        </li>
-        <li>
-          <strong>Created:</strong> {episode.created}
-        </li>
-      </ul>
+  if (error) {
+    return <Text c="red">{error}</Text>;
+  }
 
-      <p>
-        <Link to="/episodes">← Назад к списку эпизодов</Link>
-      </p>
-    </section>
-  );
+  if (!episode) {
+    return <Text>Эпизод не найден</Text>;
+  }
+
+  return <EpisodeDetailsCard episode={episode} />;
 }
 
 export default EpisodeDetailsPage;
