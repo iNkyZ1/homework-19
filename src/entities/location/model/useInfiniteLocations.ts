@@ -10,31 +10,39 @@ export function useInfiniteLocations() {
   const [error, setError] = useState<null | string>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const loadLocations = async () => {
-      if (!hasMore || loading) return;
+      if (!hasMore) return;
 
       try {
         setLoading(true);
         const data = await fetchLocations(page);
 
+        if (cancelled) return;
+
         setLocations((prev) => [...prev, ...data.results]);
         setHasMore(Boolean(data.info.next));
         setError(null);
       } catch (err) {
+        if (cancelled) return;
         setError((err as Error).message);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     loadLocations();
-  }, [hasMore, loading, page]);
 
-  return {
-    locations,
-    loading,
-    error,
-    hasMore,
-    loadMore: () => setPage((prev) => prev + 1),
+    return () => {
+      cancelled = true;
+    };
+  }, [page]);
+
+  const loadMore = () => {
+    if (loading || !hasMore) return;
+    setPage((prev) => prev + 1);
   };
+
+  return { locations, loading, error, hasMore, loadMore };
 }

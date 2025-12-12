@@ -10,32 +10,39 @@ export function useInfiniteCharacters() {
   const [error, setError] = useState<null | string>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const loadCharacters = async () => {
-      if (!hasMore || loading) return;
+      if (!hasMore) return;
 
       try {
         setLoading(true);
-
         const data = await fetchCharacters(page);
+
+        if (cancelled) return;
 
         setCharacters((prev) => [...prev, ...data.results]);
         setHasMore(Boolean(data.info.next));
         setError(null);
       } catch (err) {
+        if (cancelled) return;
         setError((err as Error).message);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     loadCharacters();
-  }, [hasMore, loading, page]);
 
-  return {
-    characters,
-    loading,
-    error,
-    hasMore,
-    loadMore: () => setPage((prev) => prev + 1),
+    return () => {
+      cancelled = true;
+    };
+  }, [page]);
+
+  const loadMore = () => {
+    if (loading || !hasMore) return;
+    setPage((prev) => prev + 1);
   };
+
+  return { characters, loading, error, hasMore, loadMore };
 }

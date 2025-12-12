@@ -10,31 +10,39 @@ export function useInfiniteEpisodes() {
   const [error, setError] = useState<null | string>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const loadEpisodes = async () => {
-      if (!hasMore || loading) return;
+      if (!hasMore) return;
 
       try {
         setLoading(true);
         const data = await fetchEpisodes(page);
 
+        if (cancelled) return;
+
         setEpisodes((prev) => [...prev, ...data.results]);
         setHasMore(Boolean(data.info.next));
         setError(null);
       } catch (err) {
+        if (cancelled) return;
         setError((err as Error).message);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     loadEpisodes();
-  }, [hasMore, loading, page]);
 
-  return {
-    episodes,
-    loading,
-    error,
-    hasMore,
-    loadMore: () => setPage((prev) => prev + 1),
+    return () => {
+      cancelled = true;
+    };
+  }, [page]);
+
+  const loadMore = () => {
+    if (loading || !hasMore) return;
+    setPage((prev) => prev + 1);
   };
+
+  return { episodes, loading, error, hasMore, loadMore };
 }
