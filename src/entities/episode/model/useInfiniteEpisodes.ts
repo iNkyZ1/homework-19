@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import type { Episode } from "../types";
-
-const API_URL = "https://rickandmortyapi.com/api/episode";
+import { fetchEpisodes } from "@/entities/episode/api/episodeApi";
+import type { Episode } from "@/entities/episode/model/types";
 
 export function useInfiniteEpisodes() {
   const [episodes, setEpisodes] = useState<Episode[]>([]);
@@ -11,17 +10,16 @@ export function useInfiniteEpisodes() {
   const [error, setError] = useState<null | string>(null);
 
   useEffect(() => {
-    const fetchEpisodes = async () => {
+    const loadEpisodes = async () => {
       if (!hasMore || loading) return;
 
       try {
         setLoading(true);
-        const response = await fetch(`${API_URL}?page=${page}`);
-        if (!response.ok) throw new Error("Ошибка при загрузке эпизодов");
+        const data = await fetchEpisodes(page);
 
-        const data = await response.json();
         setEpisodes((prev) => [...prev, ...data.results]);
-        setHasMore(data.info.next !== null);
+        setHasMore(Boolean(data.info.next));
+        setError(null);
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -29,7 +27,7 @@ export function useInfiniteEpisodes() {
       }
     };
 
-    fetchEpisodes();
+    loadEpisodes();
   }, [hasMore, loading, page]);
 
   return {
