@@ -9,40 +9,31 @@ export function useInfiniteCharacters() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<null | string>(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  const loadCharacters = async () => {
+    if (!hasMore || loading) return;
+    setLoading(true);
 
-    const loadCharacters = async () => {
-      if (!hasMore) return;
-
-      try {
-        setLoading(true);
-        const data = await fetchCharacters(page);
-
-        if (cancelled) return;
-
-        setCharacters((prev) => [...prev, ...data.results]);
-        setHasMore(Boolean(data.info.next));
-        setError(null);
-      } catch (err) {
-        if (cancelled) return;
-        setError((err as Error).message);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-
-    loadCharacters();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [page]);
-
-  const loadMore = () => {
-    if (loading || !hasMore) return;
-    setPage((prev) => prev + 1);
+    try {
+      const data = await fetchCharacters(page);
+      setCharacters((prev) => [...prev, ...data.results]);
+      setHasMore(Boolean(data.info.next));
+      setError(null);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return { characters, loading, error, hasMore, loadMore };
+  useEffect(() => {
+    loadCharacters();
+  }, [page]);
+
+  return {
+    characters,
+    loading,
+    error,
+    hasMore,
+    loadMore: () => setPage((prev) => prev + 1),
+  };
 }
