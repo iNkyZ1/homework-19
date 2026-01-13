@@ -1,3 +1,7 @@
+export const LOCAL_STORAGE_KEYS = {
+  IS_AUTH: "isAuth",
+} as const;
+
 export function storageGet<T>(key: string): T | null {
   try {
     const raw = localStorage.getItem(key);
