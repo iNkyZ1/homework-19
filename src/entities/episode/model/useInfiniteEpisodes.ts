@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { fetchEpisodes } from "@/entities/episode/api/episodeApi";
 import type { Episode } from "@/entities/episode/model/types";
 
@@ -14,9 +14,9 @@ export function useInfiniteEpisodes() {
 
     const loadEpisodes = async () => {
       if (!hasMore) return;
+      setLoading(true);
 
       try {
-        setLoading(true);
         const data = await fetchEpisodes(page);
 
         if (cancelled) return;
@@ -24,11 +24,12 @@ export function useInfiniteEpisodes() {
         setEpisodes((prev) => [...prev, ...data.results]);
         setHasMore(Boolean(data.info.next));
         setError(null);
-      } catch (err) {
+      } catch {
         if (cancelled) return;
-        setError((err as Error).message);
+        setError("Ошибка загрузки эпизодов");
       } finally {
-        if (!cancelled) setLoading(false);
+        if (cancelled) return;
+        setLoading(false);
       }
     };
 
@@ -39,10 +40,10 @@ export function useInfiniteEpisodes() {
     };
   }, [page]);
 
-  const loadMore = () => {
+  const loadMore = useCallback(() => {
     if (loading || !hasMore) return;
     setPage((prev) => prev + 1);
-  };
+  }, [loading, hasMore]);
 
   return { episodes, loading, error, hasMore, loadMore };
 }

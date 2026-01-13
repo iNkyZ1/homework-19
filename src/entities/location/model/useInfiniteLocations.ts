@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { fetchLocations } from "@/entities/location/api/locationApi";
 import type { Location } from "@/entities/location/model/types";
 
@@ -14,9 +14,9 @@ export function useInfiniteLocations() {
 
     const loadLocations = async () => {
       if (!hasMore) return;
+      setLoading(true);
 
       try {
-        setLoading(true);
         const data = await fetchLocations(page);
 
         if (cancelled) return;
@@ -24,11 +24,12 @@ export function useInfiniteLocations() {
         setLocations((prev) => [...prev, ...data.results]);
         setHasMore(Boolean(data.info.next));
         setError(null);
-      } catch (err) {
+      } catch {
         if (cancelled) return;
-        setError((err as Error).message);
+        setError("Ошибка загрузки локаций");
       } finally {
-        if (!cancelled) setLoading(false);
+        if (cancelled) return;
+        setLoading(false);
       }
     };
 
@@ -39,10 +40,10 @@ export function useInfiniteLocations() {
     };
   }, [page]);
 
-  const loadMore = () => {
+  const loadMore = useCallback(() => {
     if (loading || !hasMore) return;
     setPage((prev) => prev + 1);
-  };
+  }, [loading, hasMore]);
 
   return { locations, loading, error, hasMore, loadMore };
 }

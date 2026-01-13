@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { fetchCharacters } from "@/entities/character/api/characterApi";
 import type { Character } from "@/entities/character/model/types";
 
@@ -18,8 +18,8 @@ export function useInfiniteCharacters() {
       setCharacters((prev) => [...prev, ...data.results]);
       setHasMore(Boolean(data.info.next));
       setError(null);
-    } catch (err) {
-      setError((err as Error).message);
+    } catch {
+      setError("Ошибка загрузки персонажей");
     } finally {
       setLoading(false);
     }
@@ -29,11 +29,16 @@ export function useInfiniteCharacters() {
     loadCharacters();
   }, [page]);
 
+  const loadMore = useCallback(() => {
+    if (loading || !hasMore) return;
+    setPage((prev) => prev + 1);
+  }, [loading, hasMore]);
+
   return {
     characters,
     loading,
     error,
     hasMore,
-    loadMore: () => setPage((prev) => prev + 1),
+    loadMore,
   };
 }
