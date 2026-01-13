@@ -13,12 +13,10 @@ export function useInfiniteLocations() {
     let cancelled = false;
 
     const loadLocations = async () => {
-      if (!hasMore) return;
       setLoading(true);
 
       try {
         const data = await fetchLocations(page);
-
         if (cancelled) return;
 
         setLocations((prev) => [...prev, ...data.results]);
@@ -28,8 +26,9 @@ export function useInfiniteLocations() {
         if (cancelled) return;
         setError("Ошибка загрузки локаций");
       } finally {
-        if (cancelled) return;
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 

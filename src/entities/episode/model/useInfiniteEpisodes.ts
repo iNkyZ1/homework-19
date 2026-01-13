@@ -13,12 +13,10 @@ export function useInfiniteEpisodes() {
     let cancelled = false;
 
     const loadEpisodes = async () => {
-      if (!hasMore) return;
       setLoading(true);
 
       try {
         const data = await fetchEpisodes(page);
-
         if (cancelled) return;
 
         setEpisodes((prev) => [...prev, ...data.results]);
@@ -28,8 +26,9 @@ export function useInfiniteEpisodes() {
         if (cancelled) return;
         setError("Ошибка загрузки эпизодов");
       } finally {
-        if (cancelled) return;
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 

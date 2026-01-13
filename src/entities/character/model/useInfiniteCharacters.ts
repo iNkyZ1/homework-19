@@ -9,24 +9,34 @@ export function useInfiniteCharacters() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<null | string>(null);
 
-  const loadCharacters = async () => {
-    if (!hasMore || loading) return;
-    setLoading(true);
-
-    try {
-      const data = await fetchCharacters(page);
-      setCharacters((prev) => [...prev, ...data.results]);
-      setHasMore(Boolean(data.info.next));
-      setError(null);
-    } catch {
-      setError("Ошибка загрузки персонажей");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    let cancelled = false;
+
+    const loadCharacters = async () => {
+      setLoading(true);
+
+      try {
+        const data = await fetchCharacters(page);
+        if (cancelled) return;
+
+        setCharacters((prev) => [...prev, ...data.results]);
+        setHasMore(Boolean(data.info.next));
+        setError(null);
+      } catch {
+        if (cancelled) return;
+        setError("Ошибка загрузки персонажей");
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
     loadCharacters();
+
+    return () => {
+      cancelled = true;
+    };
   }, [page]);
 
   const loadMore = useCallback(() => {

@@ -1,4 +1,4 @@
-import { useEffect, useState, ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
 import {
@@ -9,16 +9,11 @@ import {
 } from "@/shared/lib/storage";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return Boolean(storageGet<boolean>(LOCAL_STORAGE_KEYS.IS_AUTH));
+  });
+
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const storedAuth = storageGet<boolean>(LOCAL_STORAGE_KEYS.IS_AUTH);
-
-    if (storedAuth) {
-      setIsAuthenticated(true);
-    }
-  }, []);
 
   const login = () => {
     storageSet(LOCAL_STORAGE_KEYS.IS_AUTH, true);
