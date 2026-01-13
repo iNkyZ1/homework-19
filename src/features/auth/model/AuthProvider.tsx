@@ -9,9 +9,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const storedAuth = localStorage.getItem("isAuth");
     if (storedAuth === "true") {
-      setTimeout(() => {
-        setIsAuthenticated(true);
-      }, 0);
+      setIsAuthenticated(true);
     }
   }, []);
 
